@@ -1,2 +1,155 @@
 <?php 
-print('Success! SID: ' . $this->sid);?>
+//print('Success! SID: ' . );?>
+
+<?php echo $this->headTitle('JimmyBoykin.com')->setSeparator(' - ')->setAutoEscape(false);
+        $this->inlineScript()->captureStart();
+        echo <<<JS
+            $('.ui.sticky').sticky({context: '.ui.container'});
+            $('.ui.accordion').accordion();
+            $('#menu1').visibility({
+                continuous: true,
+                onBottomPassedReverse: function(calculations) {
+                // top is on screen
+                $('#m1').addClass("active");
+                $('#m2').removeClass("active");
+                $('#m3').removeClass("active");
+                },
+                onBottomPassed: function(calculations) {
+                // top is on screen
+                $('#m1').removeClass("active");
+                $('#m2').addClass("active");
+                $('#m3').removeClass("active");
+                }
+            });
+            $('#menu2').visibility({
+                continuous: true,
+                onBottomPassed: function(calculations) {
+                // top is on screen
+                $('#m1').removeClass("active");
+                $('#m2').removeClass("active");
+                $('#m3').addClass("active");
+                }
+            });
+            
+             $('.postauth').hide();
+             $('#drill').hide();
+            setInterval(function(){
+                $.ajax({ url: "http://jimmyboykin.com/application/tropo/demodata/" + $('#demoid').text(), success: function(data){
+                    if(data.phone) { 
+                        if(data.phone != $('#phone').text()){
+                            $('#phone').html(data.phone).transition({animation: 'pulse', duration: '3s'}); 
+                            $('.postauth').transition({animation: 'jiggle in', interval: '200'}); 
+                            $('.preauth').transition({animation: 'jiggle out'}); 
+                            $('#massphone').html(data.phone);
+                            $('#massname').html(data.name);
+                        }
+                    }
+                    if(data.status) {
+                        $('#massstatus').html(data.status);
+                        if(data.status == "Safe!") { 
+                            $('#massrow').addClass("positive");
+                            $('#massrow').removeClass("negative");
+                        } else {
+                            $('#massrow').addClass("negative");
+                            $('#massrow').removeClass("positive");
+                        }
+                    } else {
+                        $('#massstatus').html('Awaiting Response');
+                    }
+                    //Update your dashboard gauge
+                    console.log(data.phone);
+                }, dataType: "json"});
+            }, 3500);
+            
+            $('#alert').click(function() {
+                $('#alert').addClass("disabled");
+                $.ajax({ url: "http://jimmyboykin.com/application/tropo/alert/" + $('#demoid').text(), success: function(data){ 
+                   $('#alert').removeClass("disabled").transition("tada");
+                }
+                });
+            });
+            
+            $('#drillbutton').click(function() {
+                $('#drillbutton').addClass("disabled");
+                $.ajax({ url: "http://jimmyboykin.com/application/tropo/drill/" + $('#demoid').text(), success: function(data){ 
+                   $('#drillbutton').removeClass("disabled").transition("tada");
+                   $('#drill').transition('slide in');
+                }
+                });
+            });
+JS;
+$this->inlineScript()->captureEnd();
+            
+
+            ?>
+            
+
+<div class="ui sticky pointing menu">
+  <a id="m1" href="#welcome" class="active item">
+    Welcome
+  </a>
+  <a id="m2" href="#alert" class="item postauth">
+    Alerts
+  </a>
+  <a id="m3" href="#mass" class="item postauth">
+    Mass Notifications
+  </a>
+
+  <div class="right menu">
+    <div class="ui right aligned item">
+        <DIV id="phone"></DIV><i class="phone icon"></i>
+
+      </div>
+  </div>
+</div>
+
+
+<a name="welcome"></a><h1 class="ui top attached header">Welcome!</h1>
+<div class="preauth">
+<div class="ui attached segment" id="menu1"><p>To get started text code <B id="demoid"><?=$this->demoid?></B> to <B>919-500-7854</B>.</p></div>
+</div>
+<div class="postauth">
+<div class="ui attached segment" id="menu1"><p>Number verified! Demos on this page will use your number.</p></div>
+</div>
+
+<div class="postauth">
+<a name="alert"></a><h1 class="ui top attached header">Alerts</h1>
+<div class="ui attached segment alertbuttonholder" id="menu2">
+<p>Alerts can be used to notify the right people anyplace, anytime, without a custom app or device.</p>
+<button class="massive ui button" id="alert">Send Test Alert!</button>
+</div>
+<a name="mass"></a><h1 class="ui top attached header">Mass Notifications</h1>
+<div class="ui attached segment" id="menu3">
+<p>Notify a group of people of an emergency. Quickly determine who is safe and who needs help.</p>
+<button class="massive ui button" id="drillbutton">Initiate Emergency Drill!</button>
+
+<table id="drill" class="ui celled table">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Phone</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr id="massrow">
+      <td id="massname"></td>
+      <td id="massphone"></td>
+      <td id="massstatus"></td>
+    </tr>
+    <tr class="positive">
+      <td>Jimmy</td>
+      <td>19199438138</td>
+      <td>Safe!</td>
+    </tr>
+    <tr class="negative">
+      <td>Jill</td>
+      <td>19995551212</td>
+      <td>Help!</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+    <div class="column"><img class="ui large centered image" src="<?php echo $this->basePath('img/tropo.png') ?>" alt="Tropo"/></div>
